@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Depop Scraper — Architecture Overview</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c2230; --line:#2a3140;
+    --ink:#e6edf3; --dim:#9aa7b5; --accent:#7ee787; --accent2:#79c0ff;
+    --warn:#f0a868; --bad:#ff7b72; --mono:'SF Mono',ui-monospace,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;}
+  .wrap{max-width:1000px;margin:0 auto;padding:40px 24px 80px}
+  h1{font-size:30px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--dim);margin:0 0 32px}
+  h2{font-size:20px;margin:44px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  code,.mono{font-family:var(--mono);font-size:.92em}
+  code{background:#222b38;padding:1px 6px;border-radius:5px;color:var(--accent2)}
+  .grid{display:grid;gap:14px}
+  /* pipeline */
+  .pipe{display:flex;flex-direction:column;gap:0}
+  .stage{display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start}
+  .stage .rail{display:flex;flex-direction:column;align-items:center}
+  .stage .dot{width:30px;height:30px;border-radius:50%;background:var(--panel2);
+    border:2px solid var(--accent2);display:flex;align-items:center;justify-content:center;
+    font-weight:700;color:var(--accent2);font-size:13px;flex:none}
+  .stage .bar{width:2px;flex:1;background:var(--line);min-height:18px}
+  .stage:last-child .bar{display:none}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;margin-bottom:14px;flex:1}
+  .card h3{margin:0 0 6px;font-size:16px}
+  .card .file{font-family:var(--mono);font-size:12px;color:var(--accent);float:right}
+  .card p{margin:6px 0;color:var(--dim)}
+  .card .why{color:var(--ink)}
+  .why b{color:var(--warn)}
+  /* decisions table */
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--accent2);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  td:first-child{font-weight:600;width:30%}
+  td .r{color:var(--dim);display:block;margin-top:3px;font-size:13px}
+  .tag{display:inline-block;background:#23304a;color:var(--accent2);border-radius:5px;
+    padding:1px 7px;font-size:11px;font-family:var(--mono);margin-right:4px}
+  .bad{color:var(--bad)} .good{color:var(--accent)}
+  .note{background:var(--panel2);border-left:3px solid var(--accent2);border-radius:0 8px 8px 0;
+    padding:12px 16px;margin:14px 0;color:var(--dim)}
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;flex:1;min-width:130px}
+  .kpi b{display:block;font-size:22px;color:var(--accent)}
+  .kpi span{color:var(--dim);font-size:13px}
+  footer{margin-top:50px;color:var(--dim);font-size:13px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Depop Scraper — Architecture Overview</h1>
+  <p class="sub">Vintage-hat resale-arbitrage pipeline · pure Python stdlib · <span class="mono">~/Dev/depop-scraper</span></p>
+
+  <div class="kpis">
+    <div class="kpi"><b>1 req</b><span>per page of 24 listings — full data, no detail fetch</span></div>
+    <div class="kpi"><b>~90%+</b><span>decided by rules, $0 tokens</span></div>
+    <div class="kpi"><b>0 deps</b><span>stdlib only (urllib + sqlite3)</span></div>
+    <div class="kpi"><b>0 login</b><span>fresh UUID headers, no auth</span></div>
+  </div>
+
+  <p>One sentence: <b>poll Depop's private search API for cheap vintage hats, score each
+  listing against a hand-built value rubric, escalate only the ambiguous ones to an LLM,
+  and push a phone notification when something is worth buying to resell — without ever
+  notifying twice.</b></p>
+
+  <h2>Data flow &amp; key breakpoints</h2>
+  <div class="pipe">
+
+    <div class="stage">
+      <div class="rail"><div class="dot">1</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">depop.py · search()</span>
+        <h3>Fetch — private "presentation" API</h3>
+        <p>GET <code>/presentation/api/v1/search/products/</code> with fresh UUID headers, paginated via the <code>page_info.last</code> cursor.</p>
+        <p class="why"><b>Why this endpoint:</b> the search row already contains full description, brand, condition &amp; images — so <b>no per-listing detail request</b> is needed. Official <code>webapi.depop.com</code> v2/v3 are deprecated; browser automation would be heavier and bannable.</p>
+        <p class="why"><b>Breakpoint:</b> fresh <code>depop-device-id / session-id / search-id</code> UUIDs per request — without them the API returns <span class="bad">400</span>. No login/session is needed.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">2</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">depop.py · _get()</span>
+        <h3>Rate-limit discipline</h3>
+        <p>Jittered delay (<code>delay + rand(0,1) + attempt*5</code>) before every call; retry transient network errors only.</p>
+        <p class="why"><b>Breakpoint:</b> on <span class="bad">403 / 429</span> it raises <code>RateLimited</code> and <b>aborts the whole scrape</b> — it does not retry. Politeness over completeness: better to skip a run than get the device fingerprint banned.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">3</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">store.py · is_seen()</span>
+        <h3>Dedup against SQLite</h3>
+        <p>Drop any listing id already in <code>seen.db</code> before doing any scoring work.</p>
+        <p class="why"><b>Why early:</b> dedup <b>before</b> normalize/score/LLM means zero tokens and zero work spent on listings already processed. The DB is the idempotency boundary.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">4</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">depop.py · normalize()</span>
+        <h3>Normalize raw row → pipeline schema</h3>
+        <p>Flatten pricing (<code>pricing[final_price_key].total_price</code>), pull first image per format, derive title/seller from the slug.</p>
+        <p class="why"><b>Why:</b> decouples the messy API shape from scoring. A price/range guard (<code>0 &lt; price ≤ max_price</code>) drops junk before scoring.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">5</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">scoring.py · value_rubric.json</span>
+        <h3>Rule-based scoring (the brain)</h3>
+        <p>Keyword/regex points: brand tier, era, defunct teams, 3+ rarity factors, negatives, and <b>per-brand price gating</b>. Clamp 0–100 → <code>buy ≥70</code> / <code>maybe ≥60</code> / <code>skip</code>.</p>
+        <p class="why"><b>Why rules first:</b> ~90%+ of listings get a confident verdict for <b>$0</b>. The expensive LLM is reserved for the narrow uncertain band only.</p>
+        <p class="why"><b>Breakpoint:</b> per-brand <code>max_buy</code> thresholds + the "3+ rarity factor" rule come straight from the human arbitrage playbook — domain knowledge encoded as data, not code.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">6</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">llm.py · judge_maybes()</span>
+        <h3>LLM fallback — "maybe" band only</h3>
+        <p>One batched Haiku call for all maybes. Text for each; <b>image attached only for the top N by score</b> (vision is pricey). System prompt is <code>cache_control: ephemeral</code>.</p>
+        <p class="why"><b>Why batched + capped:</b> tokens are logged and capped per run. Prompt-caching the system prompt cuts cost across runs. Verdict flips <code>maybe → buy/skip</code>.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">7</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">notify.py · ntfy.sh</span>
+        <h3>Notify — buys above threshold</h3>
+        <p>JSON publish to ntfy topic with click-action to the listing. Gated by <code>verdict==buy &amp;&amp; score≥90 &amp;&amp; price≤max</code>.</p>
+        <p class="why"><b>Why JSON publish:</b> safe for non-ASCII titles. The notify gate (90) is <b>stricter</b> than the buy threshold (70) — buy is recorded, but you're only pinged for the strongest.</p>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="rail"><div class="dot">8</div><div class="bar"></div></div>
+      <div class="card">
+        <span class="file">store.py · mark() / log_run()</span>
+        <h3>Persist — mark seen, log run</h3>
+        <p><code>INSERT OR IGNORE</code> every scored listing (with notified flag); append run stats (listings/buys/notified/tokens).</p>
+        <p class="why"><b>Why:</b> marking <b>everything</b> seen — not just buys — is what guarantees "never notify twice". The runs table gives cost/yield telemetry over time.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note"><b>Scheduling:</b> a one-shot <code>run_once</code> is the unit. <code>--loop</code> sleeps <code>cadence_minutes</code> between runs; a launchd plist (<span class="mono">com.suvan.depop-scraper.plist</span>) runs it headless. Crash-resilience comes from SQLite state, not from the loop staying alive.</div>
+
+  <h2>Architectural decisions &amp; the reason for each</h2>
+  <table>
+    <tr><th>Decision</th><th>Why</th></tr>
+    <tr><td>Private presentation API, not official API or browser<span class="r"></span></td>
+      <td>Official v2/v3 deprecated; presentation API returns full description/brand/condition/images in the <em>search</em> row → 1 request/page, no detail fetch, no headless browser.</td></tr>
+    <tr><td>Fresh UUIDs every request, no login</td>
+      <td>API only needs well-formed device/session/search UUID headers (400 without). No auth state to manage or leak; each request looks independent.</td></tr>
+    <tr><td>Abort scrape on 403/429 (no retry)</td>
+      <td>Protect the IP/fingerprint. A missed run self-heals next cadence; a ban doesn't.</td></tr>
+    <tr><td>Dedup in SQLite <em>before</em> scoring</td>
+      <td>Idempotency + "never notify twice"; spends zero work/tokens on already-seen ids.</td></tr>
+    <tr><td>Rules-first, LLM only on the <code>maybe</code> band</td>
+      <td>Cost control: ~90%+ decided for free; pay the model only where rules are genuinely uncertain.</td></tr>
+    <tr><td>Rubric as JSON data, not Python</td>
+      <td>Domain playbook (brand max-buys, defunct teams, rarity factors) tunable without touching logic.</td></tr>
+    <tr><td>Vision on top-N maybes only + cached system prompt</td>
+      <td>Images dominate token cost; cap them and cache the static instruction to keep $/run low.</td></tr>
+    <tr><td>Notify gate (90) stricter than buy gate (70)</td>
+      <td>Record all buys for analysis; only interrupt the human for high-confidence finds.</td></tr>
+    <tr><td>Pure stdlib (urllib + sqlite3), zero deps</td>
+      <td>Trivial to run under launchd/cron on any Mac; nothing to install, no venv drift.</td></tr>
+    <tr><td>State in DB, scheduling outside the process</td>
+      <td>Each run is a pure function of (config, DB); loop/launchd just decides <em>when</em>. Crash-safe.</td></tr>
+  </table>
+
+  <footer>Generated for self-study · open the source files alongside this for full detail.</footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "queries": [
+    "vintage snapback",
+    "90s snapback",
+    "deadstock hat",
+    "sports specialties",
+    "starter snapback",
+    "apex one hat",
+    "logo athletic",
+    "the game hat",
+    "vintage new era",
+    "wool snapback",
+    "made in usa hat",
+    "corduroy hat",
+    "script snapback",
+    "big logo hat",
+    "sharktooth hat",
+    "von dutch trucker",
+    "y2k hat",
+    "vintage nba hat",
+    "vintage nfl hat",
+    "montreal expos hat",
+    "hartford whalers hat",
+    "seattle sonics hat",
+    "mighty ducks hat",
+    "white sox snapback",
+    "sport specialties",
+    "newera vintage",
+    "snap back vintage",
+    "starter hat"
+  ],
+  "max_price_usd": 75,
+  "cadence_minutes": 30,
+  "pages_per_query": 2,
+  "items_per_page": 24,
+  "request_delay_seconds": 2.5,
+  "llm": {
+    "enabled": true,
+    "model": "claude-haiku-4-5-20251001",
+    "max_tokens_per_run": 4000,
+    "vision_top_n": 3
+  },
+  "notify": {
+    "min_score": 90,
+    "max_price_usd": 75,
+    "comment": "Notify on buys scoring 90+."
+  },
+  "rubric_path": "value_rubric.json",
+  "db_path": "seen.db"
+}
