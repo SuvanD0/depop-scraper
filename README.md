@@ -106,12 +106,15 @@ To enable LLM judging of the `maybe` band, add `ANTHROPIC_API_KEY` to your `.env
 
 ## Run it on a schedule (macOS)
 
-`com.suvan.depop-scraper.plist` is a launchd template that runs `run.py` every 30
-minutes. Edit the paths to match your clone, then:
+The easiest path is `python3 run.py setup`, which generates and loads a launchd
+agent with the correct paths for your machine automatically.
+
+To do it by hand, `com.depop-scraper.plist` is a template — replace the
+`/ABSOLUTE/PATH/TO/depop-scraper` placeholders with your clone path, then:
 
 ```bash
-cp com.suvan.depop-scraper.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.suvan.depop-scraper.plist
+cp com.depop-scraper.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.depop-scraper.plist
 ```
 
 On Linux, a cron entry or systemd timer calling `python3 run.py` works the same way.
