@@ -49,6 +49,7 @@ launchd scheduler with the correct paths. That's the whole onboarding.
 Then, any time:
 
 ```bash
+python3 run.py doctor         # health check before you trust it (see below)
 python3 run.py --dry-run      # test run: no notifications, no DB writes
 python3 run.py                # one real pass over the configured queries
 python3 run.py --loop         # run forever on the configured cadence
@@ -57,6 +58,39 @@ python3 run.py --query "vintage starter snapback"   # one-off custom search
 
 Requires Python 3.10+. No `pip install` needed. Prefer manual config? Copy
 `.env.example` to `.env` and set `NTFY_TOPIC` yourself instead of running setup.
+
+## Health check
+
+```bash
+python3 run.py doctor
+```
+
+Verifies Python version, env/notification setup, config + active rubric, the
+SQLite store, the ntfy server, and — most importantly — that **Depop's API is
+reachable and still returns the shape this bot parses**. If Depop changes their
+API, `doctor` is how you'll know. Exits non-zero if anything critical is broken.
+
+## Presets — target a different category
+
+The bot ships with ready-made playbooks in [`presets/`](presets/), each bundling
+category-specific search queries with a value rubric:
+
+| Preset | What it hunts |
+|--------|---------------|
+| `hats` (default) | Vintage snapbacks, fitteds, trucker hats |
+| `sneakers` | Vintage/resale sneakers (Jordan, NB, Salomon, …) |
+| `denim` | Vintage denim & workwear (Levi's Big E, selvedge, Carhartt, …) |
+| `tees` | Vintage t-shirts (band, sports, single-stitch) |
+
+Pick one during `setup`, set `"preset"` in `config.json`, or override per run:
+
+```bash
+python3 run.py --preset denim
+```
+
+The `sneakers`, `denim`, and `tees` rubrics are **starter templates** — the
+`max_buy` price thresholds are placeholders. Tune them to your market by editing
+the preset file. Want a new category? Copy a preset, swap the queries and brands.
 
 ## Configure
 

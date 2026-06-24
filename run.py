@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Depop vintage hat arbitrage pipeline.
+"""Depop resale-arbitrage pipeline.
 
 Usage:
+    python3 run.py setup            # interactive first-run setup
+    python3 run.py doctor           # health check (env, API, config, db)
     python3 run.py                  # one run over config queries
     python3 run.py --query "..."    # one-off custom query
+    python3 run.py --preset denim   # override the category preset for this run
     python3 run.py --loop           # run forever on config cadence
     python3 run.py --dry-run        # no notifications, no db writes
 """
@@ -45,8 +48,26 @@ def load_config(path: str) -> dict:
         return json.load(f)
 
 
+def load_preset(name: str) -> dict:
+    with open(os.path.join(BASE_DIR, "presets", f"{name}.json")) as f:
+        return json.load(f)
+
+
+def apply_preset(cfg: dict) -> dict:
+    """If config names a preset, fold its queries/max_price/rubric into cfg.
+    A preset is self-contained (presets/<name>.json) so categories are swappable."""
+    name = cfg.get("preset")
+    if not name:
+        return cfg
+    p = load_preset(name)
+    cfg["queries"] = p.get("queries", cfg.get("queries", []))
+    cfg["max_price_usd"] = p.get("max_price_usd", cfg["max_price_usd"])
+    cfg["_rubric"] = p["rubric"]
+    return cfg
+
+
 def run_once(cfg: dict, queries: list[str], dry_run: bool = False) -> None:
-    rubric = scoring.load_rubric(os.path.join(BASE_DIR, cfg["rubric_path"]))
+    rubric = cfg.get("_rubric") or scoring.load_rubric(os.path.join(BASE_DIR, cfg["rubric_path"]))
     conn = store.connect(os.path.join(BASE_DIR, cfg["db_path"]))
     delay = cfg["request_delay_seconds"]
     max_price = cfg["max_price_usd"]
@@ -123,16 +144,25 @@ def main() -> None:
         import setup
         setup.main()
         return
+    if len(sys.argv) > 1 and sys.argv[1] == "doctor":
+        import doctor
+        sys.exit(doctor.main())
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--query", help="one-off custom query instead of config queries")
     ap.add_argument("--loop", action="store_true", help="run forever on config cadence")
     ap.add_argument("--dry-run", action="store_true", help="no notifications, no db writes")
+    ap.add_argument("--preset", help="override config preset (e.g. hats, sneakers, denim, tees)")
     ap.add_argument("--config", default="config.json")
     args = ap.parse_args()
 
     load_env()
     cfg = load_config(args.config)
+    if args.preset:
+        cfg["preset"] = args.preset
+    cfg = apply_preset(cfg)
+    if cfg.get("preset"):
+        print(f"[run] preset: {cfg['preset']}")
     queries = [args.query] if args.query else cfg["queries"]
 
     if args.loop:

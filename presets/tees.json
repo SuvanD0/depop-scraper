@@ -1,0 +1,42 @@
+{
+  "name": "tees",
+  "description": "Starter template — vintage t-shirts (band, sports, promo). Tune to your market.",
+  "max_price_usd": 80,
+  "queries": [
+    "vintage band tee", "single stitch tee", "vintage harley davidson",
+    "90s tour shirt", "vintage rap tee", "made in usa tee", "screen stars",
+    "vintage nfl tee", "vintage nba tee", "all over print tee", "50 50 tee",
+    "vintage movie promo tee", "anvil vintage", "fruit of the loom vintage", "brockum"
+  ],
+  "rubric": {
+    "version": 1,
+    "notes": "Starter tee rubric. Blank-tag brands signal era; graphic/subject drives value. Tune freely.",
+    "thresholds": {"buy": 70, "maybe": 60},
+    "brands": {
+      "brockum": {"tier": "S", "weight": 30, "max_buy": 50, "premium_kw": ["tour", "band", "1991", "1992"]},
+      "giant": {"tier": "A", "weight": 24, "max_buy": 45, "premium_kw": ["tour", "band"]},
+      "screen stars": {"tier": "A", "weight": 26, "max_buy": 45, "premium_kw": ["best", "50/50", "single stitch"]},
+      "fruit of the loom": {"tier": "B", "weight": 18, "max_buy": 35, "requires_kw": ["vintage", "single stitch", "90s", "made in usa"]},
+      "anvil": {"tier": "B", "weight": 18, "max_buy": 35, "requires_kw": ["vintage", "single stitch", "made in usa"]},
+      "hanes": {"tier": "C", "weight": 12, "max_buy": 30, "requires_kw": ["vintage", "single stitch", "50/50", "beefy"]},
+      "harley davidson": {"tier": "A", "weight": 26, "max_buy": 50, "premium_kw": ["3d emblem", "all over print", "made in usa", "90s"]},
+      "fashion victim": {"tier": "A", "weight": 24, "max_buy": 45, "premium_kw": ["all over print"]}
+    },
+    "rarity_factors": {
+      "notes": "3+ factor rule for tees.",
+      "weight_per_factor": 8,
+      "three_plus_bonus": 15,
+      "keywords": ["single stitch", "made in usa", "50/50", "all over print", "aop", "big print", "front and back", "tour", "deadstock", "nwt", "sun faded", "thrashed", "tag fade", "3d emblem"]
+    },
+    "era_signals": {
+      "strong_weight": 16,
+      "strong": ["80s", "90s", "1980s", "1990s", "single stitch", "vtg", "deadstock"],
+      "weak_weight": 7,
+      "weak": ["vintage", "retro", "y2k", "2000s"]
+    },
+    "negative_signals": {
+      "weight": -35,
+      "keywords": ["reprint", "reissue", "bootleg repro", "replica", "fake", "modern", "custom", "diy", "stain", "stained", "hole", "holes", "torn", "rip", "ripped", "cracked print", "damaged", "smell", "odor", "kids", "youth", "toddler"]
+    }
+  }
+}

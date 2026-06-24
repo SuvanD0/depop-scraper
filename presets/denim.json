@@ -1,0 +1,43 @@
+{
+  "name": "denim",
+  "description": "Starter template — vintage denim (jeans, jackets, workwear). Tune to your market.",
+  "max_price_usd": 90,
+  "queries": [
+    "levis big e", "levis 501 made in usa", "selvedge denim", "vintage levis",
+    "levis 517", "wrangler 13mwz", "lee 101", "carhartt vintage", "vintage denim jacket",
+    "true religion", "evisu", "diesel vintage", "jnco", "redline selvedge",
+    "deadstock denim", "made in usa jeans", "single stitch denim", "70s denim"
+  ],
+  "rubric": {
+    "version": 1,
+    "notes": "Starter denim rubric. max_buy values are placeholders — adjust to current comps.",
+    "thresholds": {"buy": 70, "maybe": 60},
+    "brands": {
+      "levis": {"tier": "S", "weight": 36, "max_buy": 60, "premium_kw": ["big e", "501xx", "redline", "selvedge", "made in usa", "type 1", "type 2", "type 3"]},
+      "levi's": {"tier": "S", "weight": 36, "max_buy": 60, "premium_kw": ["big e", "501xx", "redline", "selvedge", "made in usa", "type 1", "type 2", "type 3"]},
+      "wrangler": {"tier": "A", "weight": 26, "max_buy": 40, "premium_kw": ["blue bell", "13mwz", "selvedge", "sanforized"]},
+      "lee": {"tier": "A", "weight": 24, "max_buy": 40, "premium_kw": ["union made", "101", "sanforized", "storm rider"]},
+      "carhartt": {"tier": "A", "weight": 26, "max_buy": 45, "premium_kw": ["made in usa", "union made", "blanket lined", "double knee"]},
+      "evisu": {"tier": "S", "weight": 30, "max_buy": 70, "premium_kw": ["daicock", "selvedge", "made in japan"]},
+      "true religion": {"tier": "B", "weight": 16, "max_buy": 40, "premium_kw": ["super t", "big t", "made in usa"]},
+      "diesel": {"tier": "C", "weight": 10, "max_buy": 30, "premium_kw": ["vintage", "made in italy"]},
+      "jnco": {"tier": "B", "weight": 18, "max_buy": 50, "premium_kw": ["wide", "crown", "90s"]}
+    },
+    "rarity_factors": {
+      "notes": "3+ factor rule for denim.",
+      "weight_per_factor": 8,
+      "three_plus_bonus": 15,
+      "keywords": ["big e", "selvedge", "redline", "single stitch", "made in usa", "501xx", "talon zipper", "deadstock", "nwt", "sanforized", "hidden rivets", "union made", "buckle back"]
+    },
+    "era_signals": {
+      "strong_weight": 16,
+      "strong": ["70s", "80s", "1970s", "1980s", "vtg", "deadstock"],
+      "weak_weight": 7,
+      "weak": ["vintage", "90s", "retro", "y2k"]
+    },
+    "negative_signals": {
+      "weight": -35,
+      "keywords": ["replica", "repro", "reproduction", "fake", "custom", "distressed by me", "diy", "stain", "stained", "hole", "holes", "torn", "rip", "ripped", "crotch blowout", "damaged", "smell", "odor", "kids", "youth", "toddler"]
+    }
+  }
+}

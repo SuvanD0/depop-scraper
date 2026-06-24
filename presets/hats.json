@@ -1,0 +1,69 @@
+{
+  "name": "hats",
+  "description": "Vintage snapbacks, fitteds, and trucker hats (the original playbook).",
+  "max_price_usd": 75,
+  "queries": [
+    "vintage snapback", "90s snapback", "deadstock hat", "sports specialties",
+    "starter snapback", "apex one hat", "logo athletic", "the game hat",
+    "vintage new era", "wool snapback", "made in usa hat", "corduroy hat",
+    "script snapback", "big logo hat", "sharktooth hat", "von dutch trucker",
+    "y2k hat", "vintage nba hat", "vintage nfl hat", "montreal expos hat",
+    "hartford whalers hat", "seattle sonics hat", "mighty ducks hat",
+    "white sox snapback", "sport specialties", "newera vintage",
+    "snap back vintage", "starter hat"
+  ],
+  "rubric": {
+    "version": 2,
+    "notes": "Per-brand max-buy thresholds + 3+ factor rule, derived from Vintage_Hat_Arbitrage_Guide.",
+    "thresholds": {"buy": 70, "maybe": 60, "max_price_usd": 75},
+    "brands": {
+      "sports specialties": {"tier": "S+", "weight": 45, "max_buy": 30, "max_buy_premium": 75, "premium_kw": ["corduroy", "deadstock", "nwt", "script"]},
+      "the game": {"tier": "S", "weight": 40, "max_buy": 25, "premium_kw": ["big logo"]},
+      "mitchell & ness": {"tier": "S", "weight": 35, "max_buy": 40, "requires_kw": ["nwt", "limited", "le ", "deadstock"]},
+      "mitchell ness": {"tier": "S", "weight": 35, "max_buy": 40, "requires_kw": ["nwt", "limited", "le ", "deadstock"]},
+      "logo athletic": {"tier": "A", "weight": 30, "max_buy": 15, "premium_kw": ["splash", "sharktooth"]},
+      "starter": {"tier": "A", "weight": 28, "max_buy": 12, "premium_kw": ["diamond"]},
+      "apex one": {"tier": "A", "weight": 28, "max_buy": 20, "premium_kw": ["ferrari", "racing", "nfl"]},
+      "nike": {"tier": "A", "weight": 22, "max_buy": 15, "requires_kw": ["vintage", "90s", "vtg", "satin", "air"]},
+      "drew pearson": {"tier": "A", "weight": 25, "max_buy": 15, "premium_kw": ["shockwave", "jagged"]},
+      "von dutch": {"tier": "A", "weight": 25, "max_buy": 15, "premium_kw": ["trucker"]},
+      "new era": {"tier": "B", "weight": 18, "max_buy": 10, "requires_kw": ["vintage", "90s", "vtg", "green underbrim", "made in usa"]},
+      "champion": {"tier": "B", "weight": 15, "max_buy": 12, "premium_kw": ["script", "spellout", "nba"]},
+      "american needle": {"tier": "B", "weight": 18, "max_buy": 12, "premium_kw": ["marvel"]},
+      "47 brand": {"tier": "C", "weight": -15, "max_buy": 0},
+      "annco": {"tier": "C", "weight": -10, "max_buy": 0}
+    },
+    "defunct_teams": {
+      "weight": 20,
+      "tier1": ["montreal expos", "expos", "seattle pilots", "seattle sonics", "seattle supersonics", "supersonics", "hartford whalers", "whalers", "quebec nordiques", "nordiques", "houston oilers", "oilers", "vancouver grizzlies", "minneapolis lakers"]
+    },
+    "premium_teams": {
+      "weight": 10,
+      "names": ["white sox", "chicago bulls", "lakers", "cubs", "mighty ducks", "raiders", "cowboys", "dolphins", "blackhawks", "red wings", "yankees", "celtics", "warriors", "cavaliers", "cavs"]
+    },
+    "rarity_factors": {
+      "notes": "3+ factor rule: any hat with >=3 of these and price <= brand max_buy is a near-guaranteed flip.",
+      "weight_per_factor": 8,
+      "three_plus_bonus": 15,
+      "keywords": ["wool", "made in usa", "made in u.s.a", "corduroy", "deadstock", "nwt", "nwot", "new with tags", "green underbrim", "script", "cursive", "puff embroidery", "3d embroidery", "limited edition", "collab", "snapback", "fitted"]
+    },
+    "era_signals": {
+      "strong_weight": 18,
+      "strong": ["80s", "90s", "1980s", "1990s", "1985", "1986", "1987", "1988", "1989", "1990", "1991", "1992", "1993", "1994", "1995", "vtg", "deadstock", "nos", "new old stock"],
+      "weak_weight": 8,
+      "weak": ["vintage", "retro", "throwback", "y2k", "2000s", "early 2000s"]
+    },
+    "negative_signals": {
+      "weight": -35,
+      "keywords": ["replica", "reproduction", "repro", "fake", "inspired by", "style of", "custom", "personalized", "diy", "stain", "stained", "hole", "holes", "torn", "rip", "ripped", "damaged", "smell", "odor", "broken", "missing", "flaw", "cracked", "dry rot", "sweatband rot", "kids", "youth", "toddler", "costume", "cooperstown collection", "heritage collection", "foam trucker"]
+    },
+    "price_bonuses": {
+      "notes": "Bonus when listing price beats the brand's max_buy threshold from the playbook.",
+      "at_or_under_max_buy": 20,
+      "well_under_max_buy_pct": 0.5,
+      "well_under_max_buy_bonus": 10,
+      "under_premium_max_buy": 15
+    },
+    "llm_band": {"notes": "Maybe-band listings with tier S+/S/A brand match get batched to the LLM. Vision check only top N.", "vision_top_n": 3}
+  }
+}

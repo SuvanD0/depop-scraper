@@ -91,12 +91,55 @@ def write_env() -> dict:
     return {"topic": topic, "server": server}
 
 
+def choose_preset() -> None:
+    """List presets/*.json and write the chosen one into config.json."""
+    presets_dir = os.path.join(BASE_DIR, "presets")
+    if not os.path.isdir(presets_dir):
+        return
+    presets = sorted(f[:-5] for f in os.listdir(presets_dir) if f.endswith(".json"))
+    if not presets:
+        return
+
+    print(bold("\n3. Category"))
+    print(dim("   Each preset bundles search queries + a value rubric for one category."))
+    metas = {}
+    for i, name in enumerate(presets, 1):
+        try:
+            with open(os.path.join(presets_dir, f"{name}.json")) as f:
+                metas[name] = json.load(f).get("description", "")
+        except Exception:
+            metas[name] = ""
+        print(f"   {i}) {name:<10} {dim(metas[name])}")
+    default = "hats" if "hats" in presets else presets[0]
+    chosen = ""
+    while chosen not in presets:
+        ans = ask("   Pick a number or name", default=default)
+        if ans.isdigit() and 1 <= int(ans) <= len(presets):
+            chosen = presets[int(ans) - 1]
+        elif ans in presets:
+            chosen = ans
+        else:
+            chosen = default
+
+    cfg_path = os.path.join(BASE_DIR, "config.json")
+    try:
+        with open(cfg_path) as f:
+            cfg = json.load(f)
+        cfg["preset"] = chosen
+        with open(cfg_path, "w") as f:
+            json.dump(cfg, f, indent=2)
+        print(green(f"   ✓ Set preset to '{chosen}' in config.json"))
+    except Exception as e:
+        print(f"   ✗ Could not update config.json: {e}")
+        print(dim(f"   Set \"preset\": \"{chosen}\" manually."))
+
+
 def show_subscribe(settings: dict) -> None:
     topic = settings.get("topic") or os.environ.get("NTFY_TOPIC", "")
     server = settings.get("server") or os.environ.get("NTFY_SERVER", "https://ntfy.sh")
     if not topic:
         return
-    print(bold("\n3. Subscribe on your phone"))
+    print(bold("\n4. Subscribe on your phone"))
     print("   a) Install the ntfy app (iOS App Store / Google Play / F-Droid)")
     print(f"   b) Add a subscription to topic:  {green(topic)}")
     print(f"   c) Or open in a browser:  {server}/{topic}")
@@ -105,7 +148,8 @@ def show_subscribe(settings: dict) -> None:
 def send_test(settings: dict) -> None:
     if not os.environ.get("NTFY_TOPIC"):
         return
-    if not yes("\nSend a test notification now?", default=True):
+    print(bold("\n5. Test notification"))
+    if not yes("   Send a test notification now?", default=True):
         return
     try:
         from notify import notify
@@ -155,12 +199,12 @@ PLIST_TEMPLATE = """<?xml version="1.0" encoding="UTF-8"?>
 
 def install_scheduler() -> None:
     if platform.system() != "Darwin":
-        print(bold("\n4. Scheduling"))
+        print(bold("\n6. Scheduling"))
         print(dim("   Not on macOS — add a cron entry or systemd timer that runs:"))
         print(f"     {sys.executable} {os.path.join(BASE_DIR, 'run.py')}")
         return
 
-    print(bold("\n4. Run on a schedule (launchd)"))
+    print(bold("\n6. Run on a schedule (launchd)"))
     if not yes("   Install a launchd agent to run automatically?", default=True):
         print(dim("   Skipped. You can run manually with: python3 run.py --loop"))
         return
@@ -202,6 +246,7 @@ def main() -> None:
         sys.exit(1)
 
     settings = write_env()
+    choose_preset()
     show_subscribe(settings)
     send_test(settings)
     install_scheduler()

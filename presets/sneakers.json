@@ -1,0 +1,44 @@
+{
+  "name": "sneakers",
+  "description": "Starter template — vintage and resale sneakers. Tune brand max_buys to your market.",
+  "max_price_usd": 120,
+  "queries": [
+    "vintage jordan", "nike dunk", "yeezy", "new balance 990", "new balance made in usa",
+    "adidas samba", "salomon xt6", "asics gel", "vintage nike", "air max 95",
+    "jordan 1", "vans vault", "converse chuck 70", "reebok vintage", "saucony shadow",
+    "deadstock sneakers", "og sneakers", "sample sneakers", "collab sneakers", "grail sneakers"
+  ],
+  "rubric": {
+    "version": 1,
+    "notes": "Starter sneaker rubric. max_buy values are placeholders — adjust to current resale comps.",
+    "thresholds": {"buy": 70, "maybe": 60},
+    "brands": {
+      "jordan": {"tier": "S", "weight": 38, "max_buy": 90, "premium_kw": ["og", "1985", "chicago", "bred", "sample"]},
+      "yeezy": {"tier": "S", "weight": 34, "max_buy": 80, "premium_kw": ["350", "500", "boost", "static"]},
+      "new balance": {"tier": "A", "weight": 30, "max_buy": 70, "premium_kw": ["made in usa", "990", "991", "992", "993", "miusa"]},
+      "salomon": {"tier": "A", "weight": 28, "max_buy": 60, "premium_kw": ["xt6", "xt-6", "acs", "gore-tex"]},
+      "asics": {"tier": "A", "weight": 24, "max_buy": 50, "premium_kw": ["gel-lyte", "kayano", "collab"]},
+      "nike": {"tier": "A", "weight": 26, "max_buy": 70, "requires_kw": ["vintage", "90s", "og", "dunk", "air max", "sb"]},
+      "adidas": {"tier": "B", "weight": 20, "max_buy": 55, "premium_kw": ["samba", "spezial", "handball", "gazelle indoor"]},
+      "reebok": {"tier": "B", "weight": 16, "max_buy": 45, "premium_kw": ["question", "pump", "kamikaze"]},
+      "vans": {"tier": "B", "weight": 15, "max_buy": 40, "premium_kw": ["vault", "syndicate", "made in usa"]},
+      "converse": {"tier": "C", "weight": 10, "max_buy": 35, "premium_kw": ["chuck 70", "made in usa", "vintage"]}
+    },
+    "rarity_factors": {
+      "notes": "3+ factor rule for sneakers.",
+      "weight_per_factor": 8,
+      "three_plus_bonus": 15,
+      "keywords": ["deadstock", "ds", "nib", "new in box", "og all", "og box", "made in usa", "sample", "promo", "pe", "player exclusive", "collab", "limited", "grail", "vnds"]
+    },
+    "era_signals": {
+      "strong_weight": 14,
+      "strong": ["og", "vintage", "90s", "1990", "1991", "1992", "1993", "1994", "1995", "retro og"],
+      "weak_weight": 6,
+      "weak": ["retro", "throwback", "2000s", "y2k"]
+    },
+    "negative_signals": {
+      "weight": -35,
+      "keywords": ["replica", "rep", "reps", "fake", "ua", "unauthorized", "custom", "painted", "reglue", "reglued", "sole separation", "yellowed sole", "creased", "beater", "beaters", "no insole", "kids", "gs", "toddler", "td", "damaged", "ripped", "hole"]
+    }
+  }
+}

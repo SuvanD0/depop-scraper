@@ -46,7 +46,7 @@ def score(listing: dict, rubric: dict) -> dict:
     # Brand match
     matched_brand: str | None = None
     matched_spec: dict | None = None
-    for brand, spec in rubric["brands"].items():
+    for brand, spec in rubric.get("brands", {}).items():
         if not _match(text, brand):
             continue
         requires = spec.get("requires_kw")
@@ -59,36 +59,36 @@ def score(listing: dict, rubric: dict) -> dict:
         break
 
     # Era
-    era = rubric["era_signals"]
-    if _any_match(text, era["strong"]):
-        pts += era["strong_weight"]
+    era = rubric.get("era_signals", {})
+    if era.get("strong") and _any_match(text, era["strong"]):
+        pts += era.get("strong_weight", 0)
         hits.append("era:strong")
-    elif _any_match(text, era["weak"]):
-        pts += era["weak_weight"]
+    elif era.get("weak") and _any_match(text, era["weak"]):
+        pts += era.get("weak_weight", 0)
         hits.append("era:weak")
 
-    # Defunct teams (rare = big bonus)
-    defunct = rubric["defunct_teams"]
-    df_match = _first_match(text, defunct["tier1"])
+    # Defunct teams (rare = big bonus). Optional — categories without teams omit it.
+    defunct = rubric.get("defunct_teams", {})
+    df_match = _first_match(text, defunct.get("tier1", []))
     if df_match:
-        pts += defunct["weight"]
+        pts += defunct.get("weight", 0)
         hits.append(f"defunct:{df_match}")
 
-    # Premium (non-defunct) teams
-    premium = rubric["premium_teams"]
-    pt_match = _first_match(text, premium["names"])
+    # Premium (non-defunct) teams. Optional.
+    premium = rubric.get("premium_teams", {})
+    pt_match = _first_match(text, premium.get("names", []))
     if pt_match and not df_match:
-        pts += premium["weight"]
+        pts += premium.get("weight", 0)
         hits.append(f"team:{pt_match}")
 
     # 3+ rarity factor rule
-    factors = rubric["rarity_factors"]
-    factor_hits = [k for k in factors["keywords"] if _match(text, k)]
+    factors = rubric.get("rarity_factors", {})
+    factor_hits = [k for k in factors.get("keywords", []) if _match(text, k)]
     if factor_hits:
-        pts += min(len(factor_hits), 3) * factors["weight_per_factor"]
+        pts += min(len(factor_hits), 3) * factors.get("weight_per_factor", 0)
         hits.append(f"factors:{len(factor_hits)}({','.join(factor_hits[:3])})")
     if len(factor_hits) >= 3:
-        pts += factors["three_plus_bonus"]
+        pts += factors.get("three_plus_bonus", 0)
         hits.append("3+factor_rule")
 
     # Premium-keyword brand bonus (script Sports Specialties, Big Logo Game, etc.)
@@ -99,14 +99,17 @@ def score(listing: dict, rubric: dict) -> dict:
             hits.append(f"premium_kw:{pk}")
 
     # Negatives
-    neg = rubric["negative_signals"]
-    n = _first_match(text, neg["keywords"])
+    neg = rubric.get("negative_signals", {})
+    n = _first_match(text, neg.get("keywords", []))
     if n:
-        pts += neg["weight"]
+        pts += neg.get("weight", 0)
         hits.append(f"neg:{n}")
 
     # Per-brand price gating (playbook's "Guaranteed Buy" thresholds)
-    bonuses = rubric["price_bonuses"]
+    bonuses = rubric.get("price_bonuses", {
+        "at_or_under_max_buy": 20, "well_under_max_buy_pct": 0.5,
+        "well_under_max_buy_bonus": 10, "under_premium_max_buy": 15,
+    })
     if matched_spec:
         max_buy = matched_spec.get("max_buy", 0)
         max_buy_premium = matched_spec.get("max_buy_premium", max_buy)
@@ -125,7 +128,7 @@ def score(listing: dict, rubric: dict) -> dict:
             hits.append(f"price>brand_max(${max_buy})")
 
     pts = max(0, min(100, pts))
-    th = rubric["thresholds"]
+    th = rubric.get("thresholds", {"buy": 70, "maybe": 60})
     if pts >= th["buy"]:
         verdict = "buy"
     elif pts >= th["maybe"]:
