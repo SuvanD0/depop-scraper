@@ -39,16 +39,24 @@ reasoning behind each design choice.
 git clone https://github.com/SuvanD0/depop-scraper.git
 cd depop-scraper
 
-cp .env.example .env          # set NTFY_TOPIC to any unguessable string
-# subscribe to that topic in the ntfy app to get alerts on your phone
+python3 run.py setup          # interactive: ntfy topic, test push, scheduler
+```
 
+`setup` generates a private alert channel, writes your `.env`, sends a test
+notification to confirm your phone is wired up, and (on macOS) installs the
+launchd scheduler with the correct paths. That's the whole onboarding.
+
+Then, any time:
+
+```bash
 python3 run.py --dry-run      # test run: no notifications, no DB writes
 python3 run.py                # one real pass over the configured queries
 python3 run.py --loop         # run forever on the configured cadence
 python3 run.py --query "vintage starter snapback"   # one-off custom search
 ```
 
-Requires Python 3.10+. No `pip install` needed.
+Requires Python 3.10+. No `pip install` needed. Prefer manual config? Copy
+`.env.example` to `.env` and set `NTFY_TOPIC` yourself instead of running setup.
 
 ## Configure
 

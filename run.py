@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import time
 
 import depop
@@ -118,6 +119,11 @@ def run_once(cfg: dict, queries: list[str], dry_run: bool = False) -> None:
 
 
 def main() -> None:
+    if len(sys.argv) > 1 and sys.argv[1] == "setup":
+        import setup
+        setup.main()
+        return
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--query", help="one-off custom query instead of config queries")
     ap.add_argument("--loop", action="store_true", help="run forever on config cadence")
